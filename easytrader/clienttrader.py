@@ -117,13 +117,6 @@ class ClientTrader(IClientTrader):
         self._close_prompt_windows()
         self._main = self._app.top_window()
         self._init_toolbar()
-        AfxMDIFrame140s = self._main.child_window(class_name="AfxMDIFrame140s")
-        child_32770 = AfxMDIFrame140s.child_window(class_name="#32770", found_index=0)
-        print("###32770")
-        child_32770.print_control_identifiers()
-        self._buy_stock_code_edit = child_32770.child_window(class_name="Edit", found_index=0)
-        self._buy_stock_price_edit = child_32770.child_window(class_name="Edit", found_index=1)
-        self._buy_stock_num_edit = child_32770.child_window(class_name="Edit", found_index=2)
     
     @property
     def broker_type(self):
@@ -217,17 +210,89 @@ class ClientTrader(IClientTrader):
 
         return self.trade(security, price, amount)
 
+    def buy_set_trade_params(self, security, price, amount):
+        code = security[-6:]
+
+        # 设置交易所
+        if security.lower().startswith("sz"):
+            self._set_stock_exchange_type("深圳")
+        if security.lower().startswith("sh"):
+            self._set_stock_exchange_type("上海")
+        self.wait(0.1)
+
+        self._buy_stock_code_edit.select()
+        self._buy_stock_code_edit.type_keys(code)
+        self.wait(1)
+        
+        self._buy_stock_price_edit.select()
+        self._buy_stock_price_edit.type_keys(str(price))
+        self.wait(0.1)
+
+        self._buy_stock_num_edit.select()
+        self._buy_stock_num_edit.type_keys(str(int(amount)))
+
+    def buy_trade(self, security, price, amount):
+        self.buy_set_trade_params(security, price, amount)
+
+        self._submit_trade()
+
+        return self._handle_pop_dialogs(
+            handler_class=pop_dialog_handler.TradePopDialogHandler
+        )
+
     @perf_clock
     def buy(self, security, price, amount, **kwargs):
         self._switch_left_menus(["买入[F1]"])
+        AfxMDIFrame140s = self._main.child_window(class_name="AfxMDIFrame140s")
+        # print("AfxMDIFrame140s")
+        # AfxMDIFrame140s.print_control_identifiers()
+        child_32770 = AfxMDIFrame140s.child_window(class_name="#32770", found_index=0)
+        self._buy_stock_code_edit = child_32770.child_window(class_name="Edit", found_index=0)
+        self._buy_stock_price_edit = child_32770.child_window(class_name="Edit", found_index=1)
+        self._buy_stock_num_edit = child_32770.child_window(class_name="Edit", found_index=2)
+        return self.buy_trade(security, price, amount)
 
-        return self.trade(security, price, amount)
+    def sell_set_trade_params(self, security, price, amount):
+        code = security[-6:]
+
+        # 设置交易所
+        if security.lower().startswith("sz"):
+            self._set_stock_exchange_type("深圳")
+        if security.lower().startswith("sh"):
+            self._set_stock_exchange_type("上海")
+        self.wait(0.1)
+
+        self._sell_stock_code_edit.select()
+        self._sell_stock_code_edit.type_keys(code)
+        self.wait(1)
+        
+        self._sell_stock_price_edit.select()
+        self._sell_stock_price_edit.type_keys(str(price))
+        self.wait(0.1)
+
+        self._sell_stock_num_edit.select()
+        self._sell_stock_num_edit.type_keys(str(int(amount)))
+
+    def sell_trade(self, security, price, amount):
+        self.sell_set_trade_params(security, price, amount)
+
+        self._submit_trade()
+
+        return self._handle_pop_dialogs(
+            handler_class=pop_dialog_handler.TradePopDialogHandler
+        )
 
     @perf_clock
     def sell(self, security, price, amount, **kwargs):
         self._switch_left_menus(["卖出[F2]"])
-
-        return self.trade(security, price, amount)
+        AfxMDIFrame140s = self._main.child_window(class_name="AfxMDIFrame140s")
+        # print("AfxMDIFrame140s")
+        # AfxMDIFrame140s.print_control_identifiers()
+        child_32770 = AfxMDIFrame140s.child_window(class_name="#32770", found_index=0)
+        self._sell_stock_code_edit = child_32770.child_window(class_name="Edit", found_index=0)
+        self._sell_stock_price_edit = child_32770.child_window(class_name="Edit", found_index=1)
+        self._sell_stock_num_edit = child_32770.child_window(class_name="Edit", found_index=2)
+        return self.sell_trade(security, price, amount)
 
     @perf_clock
     def market_buy(self, security, amount, ttype=None, limit_price=None, **kwargs):
@@ -456,23 +521,26 @@ class ClientTrader(IClientTrader):
     def _set_trade_params(self, security, price, amount):
         code = security[-6:]
 
+        self._type_edit_control_keys(self._config.TRADE_SECURITY_CONTROL_ID, code)
+
+        # wait security input finish
+        self.wait(0.1)
+
         # 设置交易所
         if security.lower().startswith("sz"):
-            self._set_stock_exchange_type("深圳")
+            self._set_stock_exchange_type("深圳Ａ股")
         if security.lower().startswith("sh"):
-            self._set_stock_exchange_type("上海")
+            self._set_stock_exchange_type("上海Ａ股")
+
         self.wait(0.1)
 
-        self._buy_stock_code_edit.select()
-        self._buy_stock_code_edit.type_keys(code)
-        self.wait(1)
-        
-        self._buy_stock_price_edit.select()
-        self._buy_stock_price_edit.type_keys(str(price))
-        self.wait(0.1)
-
-        self._buy_stock_num_edit.select()
-        self._buy_stock_num_edit.type_keys(str(int(amount)))
+        self._type_edit_control_keys(
+            self._config.TRADE_PRICE_CONTROL_ID,
+            easyutils.round_price_by_code(price, code),
+        )
+        self._type_edit_control_keys(
+            self._config.TRADE_AMOUNT_CONTROL_ID, str(int(amount))
+        )
 
     def _set_market_trade_params(self, security, amount, limit_price=None):
         self._type_edit_control_keys(
