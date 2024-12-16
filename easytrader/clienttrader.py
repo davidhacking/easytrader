@@ -117,7 +117,14 @@ class ClientTrader(IClientTrader):
         self._close_prompt_windows()
         self._main = self._app.top_window()
         self._init_toolbar()
-
+        AfxMDIFrame140s = self._main.child_window(class_name="AfxMDIFrame140s")
+        child_32770 = AfxMDIFrame140s.child_window(class_name="#32770", found_index=0)
+        print("###32770")
+        child_32770.print_control_identifiers()
+        self._buy_stock_code_edit = child_32770.child_window(class_name="Edit", found_index=0)
+        self._buy_stock_price_edit = child_32770.child_window(class_name="Edit", found_index=1)
+        self._buy_stock_num_edit = child_32770.child_window(class_name="Edit", found_index=2)
+    
     @property
     def broker_type(self):
         return "ths"
@@ -449,26 +456,23 @@ class ClientTrader(IClientTrader):
     def _set_trade_params(self, security, price, amount):
         code = security[-6:]
 
-        self._type_edit_control_keys(self._config.TRADE_SECURITY_CONTROL_ID, code)
-
-        # wait security input finish
-        self.wait(0.1)
-
         # 设置交易所
         if security.lower().startswith("sz"):
-            self._set_stock_exchange_type("深圳Ａ股")
+            self._set_stock_exchange_type("深圳")
         if security.lower().startswith("sh"):
-            self._set_stock_exchange_type("上海Ａ股")
-
+            self._set_stock_exchange_type("上海")
         self.wait(0.1)
 
-        self._type_edit_control_keys(
-            self._config.TRADE_PRICE_CONTROL_ID,
-            easyutils.round_price_by_code(price, code),
-        )
-        self._type_edit_control_keys(
-            self._config.TRADE_AMOUNT_CONTROL_ID, str(int(amount))
-        )
+        self._buy_stock_code_edit.select()
+        self._buy_stock_code_edit.type_keys(code)
+        self.wait(1)
+        
+        self._buy_stock_price_edit.select()
+        self._buy_stock_price_edit.type_keys(str(price))
+        self.wait(0.1)
+
+        self._buy_stock_num_edit.select()
+        self._buy_stock_num_edit.type_keys(str(int(amount)))
 
     def _set_market_trade_params(self, security, amount, limit_price=None):
         self._type_edit_control_keys(
