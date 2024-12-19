@@ -263,15 +263,19 @@ class ClientTrader(IClientTrader):
         self.wait(0.1)
 
         self._sell_stock_code_edit.select()
+        self.wait(0.1)
         self._sell_stock_code_edit.type_keys(code)
         self.wait(1)
         
         self._sell_stock_price_edit.select()
+        self.wait(0.1)
         self._sell_stock_price_edit.type_keys(str(price))
         self.wait(0.1)
 
         self._sell_stock_num_edit.select()
+        self.wait(0.1)
         self._sell_stock_num_edit.type_keys(str(int(amount)))
+        self.wait(0.1)
 
     def sell_trade(self, security, price, amount):
         self.sell_set_trade_params(security, price, amount)
