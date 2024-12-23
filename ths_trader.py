@@ -8,6 +8,10 @@ from flask import Flask, request
 app = Flask(__name__)
 base_url = "http://127.0.0.1:5555/"
 
+@app.route('/hello')
+def hello():
+    return "ok!"
+
 @app.route('/balance_info')
 def get_balance_info():
     user = easytrader.use('ths')

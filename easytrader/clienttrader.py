@@ -226,7 +226,9 @@ class ClientTrader(IClientTrader):
         self.wait(1)
         
         self._buy_stock_price_edit.select()
-        self.wait(0.1)
+        self.wait(0.5)
+        self._buy_stock_price_edit.select()
+        self.wait(0.3)
         self._buy_stock_price_edit.select()
         self.wait(0.1)
         self._buy_stock_price_edit.type_keys(str(price))
@@ -274,7 +276,9 @@ class ClientTrader(IClientTrader):
         self.wait(1)
         
         self._sell_stock_price_edit.select()
-        self.wait(0.1)
+        self.wait(0.5)
+        self._sell_stock_price_edit.select()
+        self.wait(0.3)
         self._sell_stock_price_edit.select()
         self.wait(0.1)
         self._sell_stock_price_edit.type_keys(str(price))
