@@ -18,6 +18,18 @@ def get_balance_info():
     user.connect(r"C:\同花顺软件\同花顺\xiadan.exe")
     return str(user.balance)
 
+@app.route('/today_entrusts')
+def get_today_entrusts():
+    user = easytrader.use('ths')
+    user.connect(r"C:\同花顺软件\同花顺\xiadan.exe")
+    return str(user.today_entrusts)
+
+@app.route('/today_trades')
+def get_today_trades():
+    user = easytrader.use('ths')
+    user.connect(r"C:\同花顺软件\同花顺\xiadan.exe")
+    return str(user.today_trades)
+
 @app.route('/position_info')
 def get_position_info():
     user = easytrader.use('ths')
